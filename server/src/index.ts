@@ -4,36 +4,49 @@ import express from "express";
 import { ApolloServer } from "apollo-server-express";
 
 import { typeDefs } from "./typeDefs";
-import { resolvers } from "./resolvers";
+//import { resolvers } from "./resolver/UserResolvers";
+import { buildSchema } from "type-graphql";
+import { UserResolver } from "./resolver/UserResolver";
 
 require("dotenv").config();
 
 const startServer = async () => {
-  const server = new ApolloServer({ typeDefs, resolvers });
-
+  const app = express();
+  app.set("proxy", 1);
 
   let db_port = parseInt(process.env.db_port!);
-  await createConnection({
+  const conn = await createConnection({
     type: "postgres",
-    host: process.env.db_host,
-    port: db_port,
-    username: process.env.db_username,
-    password: process.env.db_password,
-    database: process.env.db_database,
+    url: process.env.DATABASE_URL,
     entities: ["dist/entity/**/*.js"],
     migrations: ["dist/migration/**/*.js"],
-    subscribers: ["dist/subscriber/**/*.js"],
+    //subscribers: ["dist/subscriber/**/*.js"],
     synchronize: true,
-    logging: true
+    logging: true,
   });
 
-  const app = express();
+  //await conn.runMigrations();
 
-  server.applyMiddleware({ app });
+  const server = new ApolloServer({
+    schema: await buildSchema({
+      resolvers: [UserResolver],
+    }),
+    context: ({ req, res }) => ({ req, res }),
+    playground: true,
+  });
 
-  app.listen({ port: 4000 }, () =>
-    console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`)
+
+  server.applyMiddleware({ app, cors: { origin: "*" } });
+
+  
+  const PORT = process.env.PORT || 4000;
+
+
+  app.listen({ port: process.env.PORT }, () =>
+    console.log(`🚀 Server ready at ${server.graphqlPath}`)
   );
 };
 
-startServer();
+startServer().catch((err) => {
+  console.error(err);
+});
