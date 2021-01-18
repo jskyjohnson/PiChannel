@@ -7,6 +7,9 @@ import { typeDefs } from "./typeDefs";
 //import { resolvers } from "./resolver/UserResolvers";
 import { buildSchema } from "type-graphql";
 import { UserResolver } from "./resolver/UserResolver";
+import { BoardResolver } from "./resolver/BoardResolver";
+import { PostResolver } from "./resolver/PostResolver";
+import { ThreadResolver } from "./resolver/ThreadResolver";
 
 require("dotenv").config();
 
@@ -29,20 +32,17 @@ const startServer = async () => {
 
   const server = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [UserResolver],
+      resolvers: [UserResolver, BoardResolver, PostResolver, ThreadResolver],
     }),
     context: ({ req, res }) => ({ req, res }),
     playground: true,
   });
 
-
   server.applyMiddleware({ app, cors: { origin: "*" } });
 
-  
   const PORT = process.env.PORT || 4000;
 
-
-  app.listen({ port: process.env.PORT }, () =>
+  app.listen({ port: PORT }, () =>
     console.log(`🚀 Server ready at ${server.graphqlPath}`)
   );
 };
