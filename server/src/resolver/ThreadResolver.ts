@@ -30,6 +30,9 @@ class ThreadResponse {
 
   @Field({ nullable: true })
   initialPost: Post;
+
+  @Field((type) => [Post], { nullable: true })
+  posts: [Post];
 }
 
 @InputType()
@@ -49,15 +52,16 @@ class ThreadInput {
 
 @Resolver()
 export class ThreadResolver {
+  //Get a specific query...
   @Query(() => Thread)
   async GetThread(@Arg("id") id: Number) {
     let retThread = await Thread.findOne(+id);
+    retThread!.posts = await Post.find({ where: { threadId: id } });
     return retThread;
   }
 
   //Create Thread
   //Creating a thread will always create an initial post?
-
   @Mutation(() => ThreadResponse)
   async CreateThread(
     @Arg("content", (type) => ThreadInput!) content: ThreadInput
@@ -77,6 +81,7 @@ export class ThreadResolver {
     }
     const thread = new Thread();
     const post = new Post();
+
     try {
       thread.boardId = boardId;
       thread.title = content.title;
@@ -98,24 +103,20 @@ export class ThreadResolver {
       const numberOfThreads = await entityManager.count(Thread, {
         boardId: boardId,
       });
-      console.log(
-        "THERE ARE NOW " + numberOfThreads + " threads on " + board?.name
-      );
-      console.log("MAX IS " + board?.limit);
 
       if (numberOfThreads > board!.limit) {
+        //DELETE THREAD
         const oldestThread = await entityManager.findOne(Thread, {
           where: { boardId: boardId },
           order: {
             creation: "ASC",
           },
         });
-
         await entityManager.delete(Post, { threadId: oldestThread?.id });
         await entityManager.delete(Thread, oldestThread?.id);
       }
     } catch (err) {
-      console.log(" THREAD CREATION ERR " + err);
+      console.log("THREAD CREATION ERR " + err);
       return {
         success: false,
         message: "Failed to create thread ",
@@ -133,4 +134,24 @@ export class ThreadResolver {
 
   //Admin:
   //Delete Thread
+
+  @Mutation(() => ThreadResponse)
+  async DeleteThread(@Arg("id") id: Number) {
+    const entityManager = getManager();
+    try {
+      await entityManager.delete(Post, { threadId: id });
+      await entityManager.delete(Thread, id);
+    } catch (err) {
+      console.log("THREAD DELETION ERR " + err);
+      return {
+        success: false,
+        message: "Failed to delete thread " + id,
+      };
+    }
+
+    return {
+      success: false,
+      message: "Deleted thread " + id,
+    };
+  }
 }
