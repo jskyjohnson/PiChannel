@@ -60,6 +60,14 @@ export class ThreadResolver {
     return retThread;
   }
 
+  //Get all threads in a board...
+  @Query(() => [Thread])
+  async GetThreads(@Arg("boardId") boardId: Number){
+    //TODO limit to top three ish
+    const t = await Thread.find({where: {boardId: boardId}, relations:["posts"] })
+    return t;
+  }
+
   //Create Thread
   //Creating a thread will always create an initial post?
   @Mutation(() => ThreadResponse)

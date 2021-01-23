@@ -54,9 +54,7 @@ export class Board extends BaseEntity {
   //Array of current threads?
   //One to Many?
   @Field((type) => [Thread], { nullable: true })
-  @OneToMany((type) => Thread, (thread) => thread.board, {
-    cascade: ["insert"],
-  })
+  @OneToMany((type) => Thread, (thread) => thread.board)
   threads: Thread[];
 
   //Do I need a typeorm thing for this? I honestly have no idea...

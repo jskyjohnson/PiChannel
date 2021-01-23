@@ -5,6 +5,7 @@ const Thread = () => {
 	return (
 		<div>
 			this is a Thread
+			{/* Show all the posts? */}
 		</div>
 	);
 }

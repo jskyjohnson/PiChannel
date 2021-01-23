@@ -24,6 +24,12 @@ class BoardResponse {
   board: Board;
 }
 
+@ObjectType()
+class CollectionsResponse {
+  @Field()
+  collection: String;
+}
+
 @InputType()
 class BoardInput {
   @Field()
@@ -69,6 +75,25 @@ export class BoardResolver {
   async GetBoard(@Arg("id") id: Number) {
     let retBoard = await Board.findOne(+id);
     return retBoard;
+  }
+
+  @Query(() => [Board])
+  async GetBoards() {
+    let retBoard = await Board.find();
+    return retBoard;
+  }
+
+  //Get Collections?
+  @Query(() => [CollectionsResponse])
+  async GetCollections() {
+    const entityManager = getManager();
+    const retCollection = await entityManager
+      .createQueryBuilder()
+      .select("collection")
+      .from(Board, "board")
+      .distinct()
+      .getRawMany();
+    return retCollection;
   }
 
   //Get All Boards?
