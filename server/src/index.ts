@@ -24,7 +24,7 @@ const startServer = async () => {
     entities: ["dist/entity/**/*.js"],
     migrations: ["dist/migration/**/*.js"],
     //subscribers: ["dist/subscriber/**/*.js"],
-    synchronize: true,
+    //synchronize: true,
     logging: true,
   });
 

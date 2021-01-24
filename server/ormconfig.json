@@ -1,0 +1,16 @@
+{
+  "type": "postgres",
+  "host": "localhost",
+  "port": 5432,
+  "username": "nullzunyan",
+  "password": "badbugga2",
+  "database": "pichannel_empty",
+  "entities": ["dist/entity/*.js"],
+  "migrations": ["dist/migration/*.js"],
+  "subscribers": ["dist/subscriber/*.js"],
+  "cli": {
+    "entitiesDir": "src/entity",
+    "migrationsDir": "src/migration",
+    "subscribersDir": "src/subscriber"
+  }
+}
