@@ -48,9 +48,7 @@ export class Thread extends BaseEntity {
   //Posts
   //One to Many posts?
   @Field((type) => [Post])
-  @OneToMany((type) => Post, (post) => post.thread, {
-    cascade: ["insert"],
-  })
+  @OneToMany((type) => Post, (post) => post.thread)
   posts: Post[];
 
   //Initial Post
