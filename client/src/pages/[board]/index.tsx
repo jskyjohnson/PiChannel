@@ -12,15 +12,23 @@ import {
   Link,
   Chip,
   Container,
+  Fab,
+  TextField,
+  MenuItem,
+  Select,
   Typography,
   Divider,
 } from "@material-ui/core";
+import AddIcon from "@material-ui/icons/Add";
+import CloseIcon from "@material-ui/icons/Close";
+import PublishIcon from "@material-ui/icons/Publish";
 import ErrorOutlineIcon from "@material-ui/icons/ErrorOutline";
 import { useRouter } from "next/dist/client/router";
+import { useSnackbar } from "notistack";
+import React, { useState } from "react";
 //Should only return boards that are actually available from the server... else 404?
 
 //Thread
-
 const GET_THREADS = gql`
   query($boardName: String!) {
     GetThreads(boardName: $boardName) {
@@ -34,6 +42,21 @@ const GET_THREADS = gql`
         threadId
         text
         creation
+      }
+    }
+  }
+`;
+
+const CREATE_THREAD = gql`
+  mutation($content: ThreadInput!) {
+    CreateThread(content: $content) {
+      success
+      message
+      thread {
+        id
+      }
+      initialPost {
+        text
       }
     }
   }
@@ -53,6 +76,7 @@ const GET_BOARD = gql`
 `;
 
 const index = () => {
+  const { enqueueSnackbar } = useSnackbar();
   const router = useRouter();
   const { board } = router.query;
 
@@ -67,6 +91,40 @@ const index = () => {
     error: errorThreads,
     data: dataThreads,
   } = useQuery(GET_THREADS, { variables: { boardName: board } });
+
+  const [openEdit, setOpenEdit] = useState(false);
+  const onEditMenuToggle = () => setOpenEdit(!openEdit);
+
+  // new ThreadHandling...
+  const [threadTitle, setThreadTitle] = useState("");
+  const [threadCategories, setThreadCategories] = useState("");
+  const [threadText, setThreadText] = useState("");
+  const [createThread] = useMutation(CREATE_THREAD);
+
+  const onSubmitNewThread = (event) => {
+    event.preventDefault();
+    console.log("THREADING!");
+
+    createThread({
+      variables: {
+        content: {
+          boardName: board,
+          title: threadText,
+          category: threadCategories,
+          initialPost: { text: threadText },
+        },
+      },
+    })
+      .then((res) => {
+        if (res.data.CreateThread.success) {
+          enqueueSnackbar(res.data.CreateThread.message), "success";
+          router.push("/" + board + "/" + res.data.CreateThread.thread.id);
+        } else {
+          enqueueSnackbar(res.data.CreateThread.message), "error";
+        }
+      })
+      .catch((err) => console.log(err));
+  };
 
   if (loadingBoard) return null;
   if (errorBoard) return `Error! ${errorBoard}`;
@@ -210,6 +268,82 @@ const index = () => {
             </Box>
           ))}
         </Paper>
+      )}
+
+      {openEdit ? (
+        <form onSubmit={onSubmitNewThread}>
+          <Grid
+            container
+            justify="space-between"
+            alignItems="flex-end"
+            direction="column"
+            style={{ position: "fixed", bottom: "3rem", right: "3rem" }}
+            spacing={3}
+          >
+            <Grid item>
+              <Fab
+                color="secondary"
+                aria-label="close"
+                onClick={() => onEditMenuToggle()}
+                size="small"
+              >
+                <CloseIcon />
+              </Fab>
+            </Grid>{" "}
+            <Grid item style={{ width: "30%" }}>
+              <Paper elevation={3}>
+                <Box p="1rem">
+                  <TextField
+                    fullWidth
+                    multiline={true}
+                    rows={1}
+                    label="Thread Title"
+                    helperText="Input Thread Title Text"
+                    autoFocus
+                    value={threadTitle}
+                    onInput={(e: any) => setThreadTitle(e.target.value)}
+                  />
+                </Box>
+                <Box p="1rem">
+                  <Select
+                    autoWidth
+                    value={threadCategories}
+                    onChange={(e: any) => setThreadCategories(e.target.value)}
+                  >
+                    {dataBoard.GetBoard.categories.map((e: any) => (
+                      <MenuItem value={e}>{e}</MenuItem>
+                    ))}
+                  </Select>
+                </Box>
+                <Box p="1rem">
+                  <TextField
+                    fullWidth
+                    multiline={true}
+                    rows={5}
+                    label="PostText"
+                    helperText="Input Initial Post Text"
+                    value={threadText}
+                    onInput={(e: any) => setThreadText(e.target.value)}
+                  />
+                </Box>
+              </Paper>
+            </Grid>
+            <Grid item>
+              <Fab type="submit" color="primary" aria-label="submit">
+                <PublishIcon />
+              </Fab>
+            </Grid>
+          </Grid>
+        </form>
+      ) : (
+        <Fab
+          color="primary"
+          aria-label="post"
+          style={{ position: "fixed", bottom: "3rem", right: "3rem" }}
+          onClick={() => onEditMenuToggle()}
+        >
+          <AddIcon />
+        </Fab>
       )}
     </Container>
   );

@@ -9,6 +9,7 @@ import { ThemeProvider } from "@material-ui/core/styles";
 import theme from "../utils/theme";
 import { useApollo } from "utils/apolloClient";
 import { ApolloProvider } from "@apollo/client";
+import { SnackbarProvider } from "notistack";
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
   React.useEffect(() => {
@@ -32,7 +33,9 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
       </Head>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Component {...pageProps} />
+        <SnackbarProvider maxSnack={3}>
+          <Component {...pageProps} />
+        </SnackbarProvider>
       </ThemeProvider>
     </ApolloProvider>
   );
