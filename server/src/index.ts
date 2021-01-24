@@ -27,8 +27,7 @@ const startServer = async () => {
     //synchronize: true,
     logging: true,
   });
-
-  //await conn.runMigrations();
+  await conn.runMigrations();
 
   const server = new ApolloServer({
     schema: await buildSchema({
