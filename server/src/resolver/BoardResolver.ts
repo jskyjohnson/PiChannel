@@ -72,8 +72,8 @@ class BoardUpdate {
 @Resolver()
 export class BoardResolver {
   @Query(() => Board)
-  async GetBoard(@Arg("id") id: Number) {
-    let retBoard = await Board.findOne(+id);
+  async GetBoard(@Arg("name") name: String) {
+    let retBoard = await Board.findOne({ where: { name: name } });
     return retBoard;
   }
 

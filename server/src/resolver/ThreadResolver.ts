@@ -62,9 +62,12 @@ export class ThreadResolver {
 
   //Get all threads in a board...
   @Query(() => [Thread])
-  async GetThreads(@Arg("boardId") boardId: Number){
+  async GetThreads(@Arg("boardName") boardName: String){
     //TODO limit to top three ish
-    const t = await Thread.find({where: {boardId: boardId}, relations:["posts"] })
+    const board = await Board.findOne({where: {name: boardName}})
+    console.log(board?.id);
+    const id = board?.id
+    const t = await Thread.find({where: {boardId: id}, relations:["posts"] })
     return t;
   }
 
