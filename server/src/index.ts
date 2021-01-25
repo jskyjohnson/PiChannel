@@ -37,7 +37,7 @@ const startServer = async () => {
     playground: true,
   });
 
-  server.applyMiddleware({ app, cors: { origin: "*" } });
+  server.applyMiddleware({ app, cors: { origin: "*", credentials: true } });
 
   const PORT = process.env.PORT || 4000;
 
