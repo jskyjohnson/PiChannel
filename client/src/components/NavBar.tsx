@@ -18,7 +18,7 @@ const NavBar = () => {
     <AppBar>
       <Toolbar>
         <Grid container direction="row" alignItems="center" spacing={3}>
-          <Grid container alignItems="center" xs={6}>
+          <Grid container alignItems="center">
             <Box>
               <Avatar src="favicon-96x96.png" />
             </Box>
@@ -26,7 +26,7 @@ const NavBar = () => {
               <Typography variant="h6">Welcome!</Typography>
             </Box>
           </Grid>
-          <Grid container xs={6} alignItems="center" justify="flex-end">
+          <Grid container alignItems="center" justify="flex-end">
             <Box style={{ marginRight: "1rem" }}>
               {board ? (
                 <Link href="/">
